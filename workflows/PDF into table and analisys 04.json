@@ -1,0 +1,427 @@
+{
+  "updatedAt": "2025-05-18T17:01:37.000Z",
+  "createdAt": "2025-05-15T11:29:23.700Z",
+  "id": "PxvT2fqTTI9waLNU",
+  "name": "PDF into table and analisys 04",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "TC2 Redaction",
+        "formDescription": "Suba un archivo TC2 a procesar, e indique los I.P.F. a preservar, separados por comas, en el formato:\n\nxxxxxxxxxx,yyyyyyyyyy,zzzzzzzzzz...",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "data",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "I.P.F. a preservar",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -60,
+        -730
+      ],
+      "id": "02dc8c24-c072-4f78-bfe1-083100327510",
+      "name": "On form submission",
+      "webhookId": "313bf4b0-5cad-4ba5-91ca-31ff0f5297c3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://stirlingPdf:8080/api/v1/analysis/page-count",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "HiRA4Wq34tzym264ctW8Ljr4uNKngf"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "application/pdf"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        -580
+      ],
+      "id": "0ff347ce-8055-42ad-8036-fa8dd5f3b083",
+      "name": "PDF # pages"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://stirlingPdf:8080/api/v1/convert/pdf/csv",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "*/*"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "HiRA4Wq34tzym264ctW8Ljr4uNKngf"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "pageNumbers",
+              "value": "={{ $json.pagesNumber }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1260,
+        -730
+      ],
+      "id": "9abc03df-a453-4a58-8a72-d553e6a39251",
+      "name": "PDF extract table - to CSV"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        -655
+      ],
+      "id": "17335c25-4b59-4583-b45f-16bae833c0fe",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "jsCode": "let num = $input.first().json.pageCount\nlet pagesNumber = new Array(num);\n  //console.log(pagesArray)\n    for (let i = 0; i <= num-1; i++) {\n        pagesNumber[i] = ( i+1 );\n    }\n  //console.log(pagesArray);\n  return [{\n    pagesNumber\n  }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        -580
+      ],
+      "id": "65f95936-354b-4ffb-9fa8-7ba50922173f",
+      "name": "Create page numbers as object array"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "pagesNumber",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        600,
+        -580
+      ],
+      "id": "6deb371c-7c05-4fe0-bb73-8e41a5c40670",
+      "name": "Split array into individual objects"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        820,
+        -655
+      ],
+      "id": "e7eb9386-03c6-4613-b3ce-57bf8174205c",
+      "name": "Merge pdf file with page number objects"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        -655
+      ],
+      "id": "8a8e011b-3cd9-4374-99ca-bf94cccc4a95",
+      "name": "Loop Over page Items so they are sent one at a time"
+    },
+    {
+      "parameters": {
+        "outputPrefix": "unzippedFile_"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        1480,
+        -730
+      ],
+      "id": "82064de0-b3d6-49d6-a74c-13ab19c29d9a",
+      "name": "Unzip CSV files"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "unzippedFile_3",
+        "options": {
+          "headerRow": true,
+          "includeEmptyCells": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1700,
+        -655
+      ],
+      "id": "7b627ecc-039e-42a7-892d-f29ff6ec9d07",
+      "name": "Extract relevant CSVs and turn into json"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n    const myArray = $input.first().json['I.P.F. a preservar'];\n    if (typeof myArray !== 'string') return [];\n    var cleanArray = myArray.replace(/\\s*,\\s*/g,\",\")\n    cleanArray=cleanArray.trim()\n    var array = cleanArray.split(',').map(value => value.trim());\n    return [{\n      \"ID\": array\n    }\n  ]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -880
+      ],
+      "id": "cc377a37-4039-4926-8efb-524c16170010",
+      "name": "Split comma-separated IPF # from input",
+      "executeOnce": false,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "let increment = 0;\nlet skipRecord = Array.isArray($('Split comma-separated IPF # from input').first().json.ID) ? $('Split comma-separated IPF # from input').first().json.ID : [];\n\nfor (const item of $input.all()) {   \n    item.json.skipMe = 'no';\n\n    // Determine row number of valid record, and commit to table\n    if (item.json.NAF !== \"NAF\" && item.json.NAF !== \"\") {\n        increment++;\n        item.json.rowPosition = increment;\n    } else {\n        item.json.rowPosition = 0;\n    }\n\n    // loop through IDs comparing with the current record; if there's a match it puts a mark on it\n    if (item.json['I.P.F.']) {\n        for (const id of skipRecord) {\n            if (item.json['I.P.F.'] === id) {\n                item.json.skipMe = 'yes';\n                break;  // Exit once a match is found\n            }\n        }\n    }\n}\n\n// Assign totalRecords to all records in one pass\n$input.all().forEach(item => {\n    item.json.totalRecords = increment;\n});\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        -980
+      ],
+      "id": "72862836-ad03-402f-9414-84d26f4ac428",
+      "name": "Determine which records must skip redaction",
+      "executeOnce": true,
+      "disabled": true
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Split comma-separated IPF # from input",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "PDF # pages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge pdf file with page number objects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF # pages": {
+      "main": [
+        [
+          {
+            "node": "Create page numbers as object array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF extract table - to CSV": {
+      "main": [
+        [
+          {
+            "node": "Unzip CSV files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create page numbers as object array": {
+      "main": [
+        [
+          {
+            "node": "Split array into individual objects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split array into individual objects": {
+      "main": [
+        [
+          {
+            "node": "Merge pdf file with page number objects",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge pdf file with page number objects": {
+      "main": [
+        [
+          {
+            "node": "Loop Over page Items so they are sent one at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over page Items so they are sent one at a time": {
+      "main": [
+        [],
+        [
+          {
+            "node": "PDF extract table - to CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unzip CSV files": {
+      "main": [
+        [
+          {
+            "node": "Extract relevant CSVs and turn into json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract relevant CSVs and turn into json": {
+      "main": [
+        [
+          {
+            "node": "Loop Over page Items so they are sent one at a time",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split comma-separated IPF # from input": {
+      "main": [
+        [
+          {
+            "node": "Determine which records must skip redaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine which records must skip redaction": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "34c33fea-4b1e-43f8-92e6-6ff4c0fc2d17",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-05-15T11:29:23.748Z",
+      "createdAt": "2025-05-15T11:29:23.748Z",
+      "role": "workflow:owner",
+      "workflowId": "PxvT2fqTTI9waLNU",
+      "projectId": "clSSaLQe9S7wj6ik"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2025-05-18T16:58:53.843Z",
+      "createdAt": "2025-05-18T16:58:53.843Z",
+      "id": "HnXUnfowm5GUgmjE",
+      "name": "DEPRECATED"
+    }
+  ]
+}
