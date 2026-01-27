@@ -1,0 +1,1334 @@
+{
+  "updatedAt": "2026-01-27T22:55:29.280Z",
+  "createdAt": "2025-06-02T05:45:24.915Z",
+  "id": "EQNrLSXaylEM21I5",
+  "name": "Integrated PDF Analisys & Redaction Test #07",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Tratamiento de formulario RNT",
+        "formDescription": "Suba un archivo con la Relación Nominal de Trabajadores (RNT) a procesar, e indique los I.P.F. a preservar, separados por comas.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "data",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Códigos I.P.F. a preservar:",
+              "placeholder": "123456789X,987654321Z,123987456Y...",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "sunombre@dominio.xyz",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        -1216
+      ],
+      "id": "1d8b21c9-a11c-4926-a4f8-136428fd3a35",
+      "name": "On form submission",
+      "webhookId": "7c4d41c2-34a3-4c91-af57-dac60ad55931"
+    },
+    {
+      "parameters": {
+        "jsCode": "let num = $input.first().json.pageCount\nlet pagesNumber = new Array(num);\n  //console.log(pagesArray)\n    for (let i = 0; i <= num-1; i++) {\n        pagesNumber[i] = ( i+1 );\n    }\n  //console.log(pagesArray);\n  return [{\n    pagesNumber\n  }\n]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        -1168
+      ],
+      "id": "4d6f0913-a893-4fed-8312-2f5368b92db2",
+      "name": "Create page numbers as object array"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "pagesNumber",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -1168
+      ],
+      "id": "70a83dd3-9088-47c6-87ef-c7060d9d8c92",
+      "name": "Split array into individual objects"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1904,
+        -1616
+      ],
+      "id": "a13398b2-d740-446e-af50-47041f0e2261",
+      "name": "Merge pdf file with page number objects"
+    },
+    {
+      "parameters": {
+        "outputPrefix": "unzippedFile_"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        2560,
+        -1616
+      ],
+      "id": "28284e57-55ea-40c0-a901-32c11b7a5112",
+      "name": "Unzip CSV files"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://stirlingPdf:8080/api/v1/convert/pdf/csv",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "*/*"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "HiRA4Wq34tzym264ctW8Ljr4uNKngf"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "pageNumbers",
+              "value": "={{ $json.pagesNumber }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2352,
+        -1616
+      ],
+      "id": "02cb26f6-6ddd-40e2-bee7-23d8ceafba11",
+      "name": "PDF extract table from specific page - to CSV"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        3008,
+        -1616
+      ],
+      "id": "47cb8158-c438-4a1e-b6f8-726a1ec71643",
+      "name": "Merge JSON from CSV with array to skip"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://stirlingPdf:8080/api/v1/analysis/page-count",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "HiRA4Wq34tzym264ctW8Ljr4uNKngf"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "application/pdf"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1248,
+        -1168
+      ],
+      "id": "cefa48cb-5212-486b-bbc7-cdd9ffff2590",
+      "name": "Process PDF and report # of pages"
+    },
+    {
+      "parameters": {
+        "jsCode": "var increment = 0;\nvar varSkipNext = 'no';\nvar ipfString = \"\";\nvar skipRecord = Array.isArray($('IPF # into array').first().json.ID) ? $('IPF # into array').first().json.ID : [];\n\n// Identify valid rows and mark them with a row number; leave the rest as 0\nfor (const item of $input.all()) {\n\titem.json.myPage = $('Unzip CSV files').first().json.pagesNumber;\n\titem.json.rowPosition = 0;\n\titem.json.skipMe = 'no';\n\tconst trickyHeader1 = 'Horas\\rCoti.';\n    const trickyHeader2 = 'Días\\rCoti.';\n\t\n\tif (\n\t\titem.json[trickyHeader1] == \"BASE DE ACCIDENTES DE TRABAJO\" ||\n\t\titem.json[trickyHeader2] == \"BASE DE ACCIDENTES DE TRABAJO\" ||\n\t\titem.json[trickyHeader2] == \"BASE DE CONTINGENCIAS COMUNES\" ||\n\t\t(item.json.NAF !== \"NAF\" && item.json.NAF !== undefined && item.json['Bases y compensaciones'] == \"BASE DE CONTINGENCIAS COMUNES\") ||\n\t\t(item.json.NAF == undefined && item.json['Bases y compensaciones'] == \"BASE DE ACCIDENTES DE TRABAJO\") ||\n\t\t(item.json.NAF == undefined && item.json['Bases y compensaciones'] == \"BASE DE CONTINGENCIAS COMUNES\") ||\n\t\t(item.json[trickyHeader1] === undefined && item.json['Bases y compensaciones'] == \"BASE DE ACCIDENTES DE TRABAJO\") ||\n\t\t(item.json.NAF !== \"NAF\" && item.json.NAF !== undefined && item.json['Bases y compensaciones'] === undefined )\n\t\t\n    ){\n\t\tincrement++;\n\t\titem.json.rowPosition = increment;\n\n\t\tif (varSkipNext == 'yes'){\n\t\t\titem.json.skipMe = 'yes';\n\t\t}\n\t}\n\n\t// loop through IDs comparing with the current record; if there's a match, it puts a mark on it\n\tipfString = String(item.json['I.P.F.']);\n\tif (ipfString.length == 11) {\n\t\tfor (const id of skipRecord) {\n\t\t\tif (ipfString === id) {\n\t\t\t\titem.json.skipMe = 'yes';\n\t\t\t\tvarSkipNext = 'yes';\n\t\t\t\tbreak; // Exit once a match is found\n\t\t\t} else {\n\t\t\t\tvarSkipNext = 'no';\n\t\t\t\titem.json.skipMe = 'no'\n\t\t\t}\n\t\t}\n\t} //else {varSkipNext = 'no';}\n}\n\n// Assign totalRecords to all records in one pass\n$input.all().forEach(item => {\n\titem.json.totalRecords = increment;\n});\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3232,
+        -1568
+      ],
+      "id": "aa6b00e8-d3ef-4e28-951f-d14d06e28bb3",
+      "name": "Determine records skipping redaction",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2128,
+        -1616
+      ],
+      "id": "cf80456b-b94c-4f6c-b9f3-8c8dc36cce18",
+      "name": "Loop Over Items - one at a time"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n    const myArray = $input.first().json['Códigos I.P.F. a preservar:'];\n    if (typeof myArray !== 'string') return [];\n    var cleanArray = myArray.replace(/\\s*,\\s*/g,\",\")\n    cleanArray=cleanArray.trim()\n    var array = cleanArray.split(',').map(value => value.trim());\n    return [{\n      \"ID\": array\n    }\n  ]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2784,
+        -1328
+      ],
+      "id": "b100a6f9-df56-4930-b112-d49cfe0ab7aa",
+      "name": "IPF # into array",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "unzippedFile_3",
+        "options": {
+          "encoding": "utf-8",
+          "enableBOM": true,
+          "headerRow": true,
+          "readAsString": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        2784,
+        -1616
+      ],
+      "id": "da53652b-d093-441b-b93f-488ac29e7cd3",
+      "name": "CSV into JSON"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pdf.mandarina.consulting/api/v1/misc/repair",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "HiRA4Wq34tzym264ctW8Ljr4uNKngf"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        -1616
+      ],
+      "id": "2c003c62-f753-44c8-b27e-77720d99af48",
+      "name": "HTTP Request1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f64eec14-8a0e-48fe-b3ec-1414214cf261",
+              "leftValue": "={{ $json.error.message }}",
+              "rightValue": "Request processing failed:",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "4ea9fde8-3639-49f3-b9d6-cc1007028360",
+              "leftValue": "={{ $json.error.status }}",
+              "rightValue": 500,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "4a7756b0-685a-41bf-9535-6aa2bee9a411",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -1616
+      ],
+      "id": "1c79a337-a750-402c-91f1-3d22c50401d1",
+      "name": "If2",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1d4a182e-e848-4bc4-90e3-07a2ea926348",
+              "leftValue": "={{ $json.Metadata.Title }}",
+              "rightValue": "RNT.rpt",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cb85c0aa-3e10-4a39-b5cc-4309fb312542",
+              "leftValue": "={{ $json.Metadata.Producer }}",
+              "rightValue": "Powered By Business Objects",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        -1024
+      ],
+      "id": "af77aa1a-c4b7-4683-a313-1d3aac99c9bd",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d62fc146-e46a-49b4-a005-50f99924c5a2",
+              "name": "myPage",
+              "value": "={{ $json.myPage }}",
+              "type": "number"
+            },
+            {
+              "id": "e3496441-c37f-43c4-97a1-cc50a5046fff",
+              "name": "rowPosition",
+              "value": "={{ $json.rowPosition }}",
+              "type": "number"
+            },
+            {
+              "id": "cc5cff15-5d6e-4118-ae9a-37ff63a583f6",
+              "name": "skipMe",
+              "value": "={{ $json.skipMe }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2560,
+        -1824
+      ],
+      "id": "7205affc-f6da-4670-b84d-aa71b7ff2d86",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2292953a-1279-4232-841e-7b3019e4c7bc",
+              "leftValue": "={{ $json.rowPosition }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2352,
+        -1824
+      ],
+      "id": "57d10867-9ac9-49b3-8383-21b5b03e3506",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://stirlingPdf:8080/api/v1/security/redact",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "*/*"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "HiRA4Wq34tzym264ctW8Ljr4uNKngf"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "pageNumbers"
+            },
+            {
+              "name": "redactions",
+              "value": "={{ $json.payload }}"
+            },
+            {
+              "name": "convertPDFToImage",
+              "value": "true"
+            },
+            {
+              "name": "pageRedactionColor"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "timeout": 100000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3232,
+        -1920
+      ],
+      "id": "9c73bfc2-7f67-42cb-90e4-63c6856ac392",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "let originX = 36;\nlet originY = 213;\nlet redactionHeight = 11.25;\nlet redactionWidth =541;\nlet payload = '[';\nlet construct ='';\nlet oldPage = 1;\n\n// Loop through all rows and create a redation object per row to be deleted\nfor (const item of $input.all()) {\n\tlet currentPage = item.json.myPage;\n\tif (currentPage !== oldPage){\n\t\toriginY = 213;\n\t}\n\t\n\toriginY = originY+redactionHeight;\n\n\tif (item.json.skipMe == 'no'){\n\t\tconstruct = '{\"x\":'+originX+',\"y\":'+(originY.toFixed(2)-0.7)+',\"height\":'+redactionHeight+',\"width\":'+redactionWidth+',\"page\":'+item.json.myPage+',\"color\":\"#FFFFFF\"},';\n\t\tpayload = payload + construct;\n\t}\n\n\toldPage = currentPage;\n}\n\tif(payload.charAt(payload.length -1) == ','){\n\tpayload = payload.slice(0, -1);\n\t}\n\tpayload = payload + ']';\n\nreturn [{payload}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2784,
+        -1824
+      ],
+      "id": "1117a525-b936-4619-835e-fb72b70d8b81",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        3008,
+        -1920
+      ],
+      "id": "f445ff0d-0322-407c-b133-90d042ee3756",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@mandarina.consulting",
+        "toEmail": "={{ $('On form submission').item.json.Email }}",
+        "subject": "Error en pdf",
+        "html": "=<!DOCTYPE html>\n<html>\n<head>\n<title>Simple Email Template</title>\n</head>\n<body>\n\n<h2>Estimado {{ $('On form submission').item.json.Email }},</h2>\n<p>\nEl archivo enviado para su tratamiento ha presentado <b>errores irrecuperables</b>; puede que se encuentre dañado internamente y no haya sido posible su recuperación por nuestro sistema, que no se trate de un certificado RNT emitido por la Seguridad Social, o que haya sido manipulado de forma insegura.\n<p>\nPor favor, verifique el archivo, asegúrese de que es legible y se trata del archivo correcto, y efectúe nuevamente la solicitud.\n<p>\nGracias por utilizar nuestro servicio; reciba un saludo,\n<p>\nEl equipo de Mandarina Consulting.-\n</p>\n<small><i>Por favor, no responda a este correo; esta dirección es solo de envío y no recibe correo entrante. Si desea realizar cualquier consulta, por favor diríjase a <a href=\"mailto://info@mandarina.consulting\">info@mandarina.consulting</a>.</i> </small>\n</body>\n</html>\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1248,
+        -2128
+      ],
+      "id": "380db3d6-3a0f-4747-8a91-250bb6b0270f",
+      "name": "Send Email",
+      "webhookId": "fcb046b2-795e-42c6-9b84-6b8446509b5e",
+      "credentials": {
+        "smtp": {
+          "id": "K0Q2aFUTGvrQQamB",
+          "name": "noreply@mandarina.consulting SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@mandarina.consulting",
+        "toEmail": "={{ $('On form submission').item.json.Email }}",
+        "subject": "Formulario RNT tratado adjunto",
+        "html": "=<!DOCTYPE html>\n<html>\n<head>\n<title>Simple Email Template</title>\n</head>\n<body>\n\n<h2>Estimado {{ $('On form submission').item.json.Email }},</h2>\n<p>\nEl archivo RNT que nos hizo llegar ha sido tratado de forma que los datos de los trabajadores especificados se han mantenido visibles, mientras que los demás han sido ocultados de forma segura, en cumplimiento con las normas GDPR de transmisión mínima de datos personales entre partes.\n<p>\nEl proceso ha incluido, adicionalmente, la comprobación y reparación del pdf, en caso de detectar problemas, para asegurar así su lectura por el destinatario de la información, así como la preservación de metadatos de autoría del documento para asegurar el origen y autenticidad del mismo.\n<p>\nGracias por utilizar nuestro servicio; reciba un saludo,\n<p>\nEl equipo de Mandarina Consulting.-\n</p>\n<small><i>Por favor, no responda a este correo; esta dirección es solo de envío y no recibe correo entrante. Si desea realizar cualquier consulta, por favor diríjase a <a href=\"mailto://info@mandarina.consulting\">info@mandarina.consulting</a>.</i> </small>\n</body>\n</html>\n",
+        "options": {
+          "appendAttribution": false,
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        4320,
+        -1392
+      ],
+      "id": "0ee2d151-ea12-47a8-9292-0cd7183876f7",
+      "name": "Send Email1",
+      "webhookId": "1e7cde84-5ebc-466f-80e4-058fef869b9b",
+      "credentials": {
+        "smtp": {
+          "id": "K0Q2aFUTGvrQQamB",
+          "name": "noreply@mandarina.consulting SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pdf.mandarina.consulting/api/v1/misc/add-stamp",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "*/*"
+            },
+            {
+              "name": "X-API-KEY",
+              "value": "HiRA4Wq34tzym264ctW8Ljr4uNKngf"
+            },
+            {
+              "name": "Content-Type",
+              "value": "multipart/form-data"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "position",
+              "value": "7"
+            },
+            {
+              "name": "opacity",
+              "value": "1"
+            },
+            {
+              "name": "overrideX",
+              "value": "-1"
+            },
+            {
+              "name": "overrideY",
+              "value": "-1"
+            },
+            {
+              "name": "fontSize",
+              "value": "6"
+            },
+            {
+              "name": "stampText",
+              "value": "Porciones de este documento han sido ocultadas de forma automatizada y segura, con el fin de mostrar únicamente información relevante para la preservación de la confidencialidad, de acuerdo con normas LGPD/GDPR"
+            },
+            {
+              "name": "customColor",
+              "value": "#cccccc"
+            },
+            {
+              "name": "alphabet",
+              "value": "roman"
+            },
+            {
+              "name": "pageNumbers",
+              "value": "all"
+            },
+            {
+              "name": "stampType",
+              "value": "text"
+            },
+            {
+              "name": "rotation",
+              "value": "90"
+            },
+            {
+              "name": "customMargin",
+              "value": "medium"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "timeout": 100000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3440,
+        -1920
+      ],
+      "id": "8855f5ac-063a-490e-8636-5e2c2b7c1b0f",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pdf.mandarina.consulting/api/v1/security/get-info-on-pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "*/*"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        144,
+        -944
+      ],
+      "id": "e159d9aa-e6b3-4cbe-8fa8-ed2b1fb829ee",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch",
+        "useDataOfInput": 2
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        592,
+        -1616
+      ],
+      "id": "13ddab77-5481-4e19-8730-aecfc6768649",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pdf.mandarina.consulting/api/v1/misc/update-metadata",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "*/*"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "trapped",
+              "value": "Unknown"
+            },
+            {
+              "name": "modificationDate",
+              "value": "={{ $json.ModificationDate }}"
+            },
+            {
+              "name": "keywords",
+              "value": "{{ $json.Keywords }}"
+            },
+            {
+              "name": "author",
+              "value": "{{ $json.Author }}"
+            },
+            {
+              "name": "creator",
+              "value": "={{ $json.Creator }}"
+            },
+            {
+              "name": "subject",
+              "value": "{{ $json.Subject }}"
+            },
+            {
+              "name": "creationDate",
+              "value": "={{ $json.CreationDate }}"
+            },
+            {
+              "name": "producer",
+              "value": "={{ $json.Producer }}"
+            },
+            {
+              "name": "allRequestParams",
+              "value": "null"
+            },
+            {
+              "name": "deleteAll",
+              "value": "false"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.Title }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "lowercaseHeaders": true,
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3888,
+        -1392
+      ],
+      "id": "e6b89432-dd41-449a-a174-8f9cd3bed8a0",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "jsCode": "$input.item.binary.data.fileName = $('HTTP Request').first().json.data.filename;\n\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4112,
+        -1392
+      ],
+      "id": "2fe65b4f-3690-49e3-a1e6-6c4a27d64871",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        3664,
+        -1392
+      ],
+      "id": "7abae495-7ec8-4c20-9d56-90fcb228a3f6",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9a8c88f7-948f-4353-b41a-faa06543b838",
+              "name": "Title",
+              "value": "={{ $json.Metadata.Title }}",
+              "type": "string"
+            },
+            {
+              "id": "41b75bad-94af-4350-86fe-ddd247334aad",
+              "name": "Author",
+              "value": "={{ $json.Metadata.Author }}",
+              "type": "string"
+            },
+            {
+              "id": "db5657a9-d8d5-48bb-9fe5-4af9f4f59512",
+              "name": "Subject",
+              "value": "={{ $json.Metadata.Subject }}",
+              "type": "string"
+            },
+            {
+              "id": "a8cd6d96-3f15-427b-b9d5-b69ff796e0b4",
+              "name": "Keywords",
+              "value": "={{ $json.Metadata.Keywords }}",
+              "type": "string"
+            },
+            {
+              "id": "fbb912d6-2031-4a91-96a9-400a91ee086c",
+              "name": "Producer",
+              "value": "={{ $json.Metadata.Producer }}",
+              "type": "string"
+            },
+            {
+              "id": "00cab024-7b07-4608-87a3-512b5055cf5f",
+              "name": "Creator",
+              "value": "={{ $json.Metadata.Creator }}",
+              "type": "string"
+            },
+            {
+              "id": "fcc1fcd2-eb67-4d88-9f74-e7a7f0347a2e",
+              "name": "CreationDate",
+              "value": "={{ $json.Metadata.CreationDate }}",
+              "type": "string"
+            },
+            {
+              "id": "6e72da2b-ee2f-4d1e-8987-e16354d39a61",
+              "name": "ModificationDate",
+              "value": "={{ $json.Metadata.ModificationDate }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3440,
+        -848
+      ],
+      "id": "bc7e8e1d-ba03-4d7f-b174-381dd6622a7f",
+      "name": "pdfMetadata"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create page numbers as object array": {
+      "main": [
+        [
+          {
+            "node": "Split array into individual objects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split array into individual objects": {
+      "main": [
+        [
+          {
+            "node": "Merge pdf file with page number objects",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge pdf file with page number objects": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items - one at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unzip CSV files": {
+      "main": [
+        [
+          {
+            "node": "CSV into JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF extract table from specific page - to CSV": {
+      "main": [
+        [
+          {
+            "node": "Unzip CSV files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge JSON from CSV with array to skip": {
+      "main": [
+        [
+          {
+            "node": "Determine records skipping redaction",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process PDF and report # of pages": {
+      "main": [
+        [
+          {
+            "node": "Create page numbers as object array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine records skipping redaction": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items - one at a time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items - one at a time": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PDF extract table from specific page - to CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IPF # into array": {
+      "main": [
+        [
+          {
+            "node": "Merge JSON from CSV with array to skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CSV into JSON": {
+      "main": [
+        [
+          {
+            "node": "Merge JSON from CSV with array to skip",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IPF # into array",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge pdf file with page number objects",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Process PDF and report # of pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "pdfMetadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Send Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pdfMetadata": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2195e037-b8d9-484e-bbd2-bb5ff1e3ca4f",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-06-02T05:45:24.958Z",
+      "createdAt": "2025-06-02T05:45:24.958Z",
+      "role": "workflow:owner",
+      "workflowId": "EQNrLSXaylEM21I5",
+      "projectId": "clSSaLQe9S7wj6ik"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2025-06-01T11:16:21.286Z",
+      "createdAt": "2025-06-01T11:16:21.286Z",
+      "id": "5QPMinZ9SrSvf2Tp",
+      "name": "STABLE"
+    },
+    {
+      "updatedAt": "2025-05-18T16:59:50.073Z",
+      "createdAt": "2025-05-18T16:59:50.073Z",
+      "id": "rIOiUNMDBe4fWbDQ",
+      "name": "WIP"
+    }
+  ]
+}
