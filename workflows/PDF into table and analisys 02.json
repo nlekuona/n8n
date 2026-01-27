@@ -1,0 +1,234 @@
+{
+  "updatedAt": "2025-05-18T17:01:34.000Z",
+  "createdAt": "2025-05-12T21:12:55.041Z",
+  "id": "5lszc33heaZDazTG",
+  "name": "PDF into table and analisys 02",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://stirlingPdf:8080/api/v1/convert/pdf/csv",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "*/*"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "pageNumbers",
+              "value": "all"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "fileInput",
+              "inputDataFieldName": "Archivo_TC2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        -620
+      ],
+      "id": "1514b369-c305-49ed-a40e-737f8de4bf19",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "outputPrefix": "unzippedFile_"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        420,
+        -620
+      ],
+      "id": "41103c33-9d93-495e-acfd-24c7d623ce4e",
+      "name": "Compression"
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "unzippedFile_3",
+        "options": {
+          "headerRow": true,
+          "includeEmptyCells": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -620
+      ],
+      "id": "043bcaa0-0ecc-4ad0-b22f-822a4bfe2e9b",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "let increment = 0;\nlet skipRecord = Array.isArray($('Code').first().json.ID) ? $('Code').first().json.ID : [];\n\nfor (const item of $input.all()) {   \n    item.json.skipMe = 'no';\n\n    // Determine row number of valid record, and commit to table\n    if (item.json.NAF !== \"NAF\" && item.json.NAF !== \"\") {\n        increment++;\n        item.json.rowPosition = increment;\n    } else {\n        item.json.rowPosition = 0;\n    }\n\n    // loop through IDs comparing with the current record; if there's a match it puts a mark on it\n    if (item.json['I.P.F.']) {\n        for (const id of skipRecord) {\n            if (item.json['I.P.F.'] === id) {\n                item.json.skipMe = 'yes';\n                break;  // Exit once a match is found\n            }\n        }\n    }\n}\n\n// Assign totalRecords to all records in one pass\n$input.all().forEach(item => {\n    item.json.totalRecords = increment;\n});\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        860,
+        -720
+      ],
+      "id": "8ff5081e-f880-42c1-862c-1a8749d83538",
+      "name": "Code2",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "\n    const myArray = $input.first().json['I.P.F. a preservar'];\n    if (typeof myArray !== 'string') return [];\n    var cleanArray = myArray.replace(/\\s*,\\s*/g,\",\")\n    cleanArray=cleanArray.trim()\n    var array = cleanArray.split(',').map(value => value.trim());\n    return [{\n      \"ID\": array\n    }\n  ]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -820
+      ],
+      "id": "71dc383b-7ebc-4092-8ad9-8da926c6cefa",
+      "name": "Code",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "formTitle": "TC2 Redaction",
+        "formDescription": "Suba un archivo TC2 a procesar, e indique los I.P.F. a preservar, separados por comas, en el formato:\n\nxxxxxxxxxx,yyyyyyyyyy,zzzzzzzzzz...",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Archivo TC2",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "I.P.F. a preservar",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -20,
+        -720
+      ],
+      "id": "6140efbc-d328-40ee-b7ed-715b4cbfab8e",
+      "name": "On form submission",
+      "webhookId": "b4e3915f-f011-4bd2-bf7a-1293c6ab2414"
+    }
+  ],
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f4062622-3d02-426c-93a5-0afd62a0caa8",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-05-12T21:12:55.067Z",
+      "createdAt": "2025-05-12T21:12:55.067Z",
+      "role": "workflow:owner",
+      "workflowId": "5lszc33heaZDazTG",
+      "projectId": "clSSaLQe9S7wj6ik"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2025-05-18T16:58:53.843Z",
+      "createdAt": "2025-05-18T16:58:53.843Z",
+      "id": "HnXUnfowm5GUgmjE",
+      "name": "DEPRECATED"
+    }
+  ]
+}
