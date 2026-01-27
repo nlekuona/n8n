@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-27T22:27:00.999Z",
+  "updatedAt": "2026-01-27T22:32:46.267Z",
   "createdAt": "2026-01-27T21:02:35.951Z",
   "id": "2yVqgJ6dU60P_oD--e94N",
   "name": "Automated workflow backup with intelligent change detection using GitHub",
@@ -968,18 +968,6 @@
       ],
       "typeVersion": 2.2,
       "notes": "Pre-provisioning safe fuse"
-    },
-    {
-      "parameters": {},
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        3792,
-        672
-      ],
-      "id": "5a7d978d-5cfb-45bb-b6b3-158b4e9fbba8",
-      "name": "Wait",
-      "webhookId": "047c9a7e-e6fb-4a06-8800-e00075dfd455"
     }
   ],
   "connections": {
@@ -1085,7 +1073,7 @@
       "main": [
         [
           {
-            "node": "Wait",
+            "node": "Router",
             "type": "main",
             "index": 0
           }
@@ -1324,17 +1312,6 @@
           }
         ]
       ]
-    },
-    "Wait": {
-      "main": [
-        [
-          {
-            "node": "Router",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -1347,7 +1324,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "f3edeb26-ea33-44e6-aa18-b88aecdcadd5",
+  "versionId": "691f63b1-da9c-4a91-9368-7317bc189328",
   "activeVersionId": "3b361fe4-36d3-489b-958d-165a45013165",
   "triggerCount": 1,
   "shared": [
