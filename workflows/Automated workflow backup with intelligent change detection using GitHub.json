@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-27T22:57:18.051Z",
+  "updatedAt": "2026-01-31T20:24:22.815Z",
   "createdAt": "2026-01-27T21:02:35.951Z",
   "id": "2yVqgJ6dU60P_oD--e94N",
   "name": "Automated workflow backup with intelligent change detection using GitHub",
@@ -14,7 +14,7 @@
       "name": "Loop Over Items",
       "type": "n8n-nodes-base.splitInBatches",
       "position": [
-        3232,
+        3440,
         560
       ],
       "executeOnce": false,
@@ -42,7 +42,7 @@
       "name": "Update file content and commit",
       "type": "n8n-nodes-base.github",
       "position": [
-        5184,
+        5392,
         1520
       ],
       "webhookId": "f2d754dd-b68d-41e8-a662-7e91c1c3aa95",
@@ -114,7 +114,7 @@
       "name": "Decide changes",
       "type": "n8n-nodes-base.code",
       "position": [
-        3488,
+        3696,
         576
       ],
       "typeVersion": 2
@@ -140,7 +140,7 @@
       "name": "Delete old file",
       "type": "n8n-nodes-base.github",
       "position": [
-        5344,
+        5552,
         1056
       ],
       "webhookId": "1bd59af3-c8ee-4664-9cfd-df3ab4b6793d",
@@ -173,7 +173,7 @@
       "name": "Create new file (rename)",
       "type": "n8n-nodes-base.github",
       "position": [
-        5744,
+        5952,
         1056
       ],
       "webhookId": "1b7a1463-d11a-4c0c-a596-a4b09e003d5a",
@@ -202,7 +202,7 @@
       "name": "Merge after create (rename)",
       "type": "n8n-nodes-base.merge",
       "position": [
-        5984,
+        6192,
         1040
       ],
       "typeVersion": 3.2,
@@ -225,7 +225,7 @@
       "name": "Merge after update",
       "type": "n8n-nodes-base.merge",
       "position": [
-        5472,
+        5680,
         1504
       ],
       "typeVersion": 3.2,
@@ -298,7 +298,7 @@
       "name": "Sticky Note",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        5280,
+        5488,
         816
       ],
       "typeVersion": 1
@@ -364,7 +364,7 @@
       "name": "Sticky Note4",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        3776,
+        3984,
         -352
       ],
       "typeVersion": 1,
@@ -378,7 +378,7 @@
       "name": "Build summary arrays",
       "type": "n8n-nodes-base.code",
       "position": [
-        4080,
+        4288,
         -240
       ],
       "typeVersion": 2
@@ -391,7 +391,7 @@
       "name": "Render summary",
       "type": "n8n-nodes-base.code",
       "position": [
-        4528,
+        4736,
         -240
       ],
       "notesInFlow": false,
@@ -437,7 +437,7 @@
       "name": "Anything changed?",
       "type": "n8n-nodes-base.if",
       "position": [
-        4304,
+        4512,
         -240
       ],
       "typeVersion": 2.2
@@ -529,7 +529,7 @@
       "name": "Is Telegram configured?",
       "type": "n8n-nodes-base.if",
       "position": [
-        3856,
+        4064,
         -240
       ],
       "typeVersion": 2.2
@@ -547,7 +547,7 @@
       "name": "Send a message",
       "type": "n8n-nodes-base.telegram",
       "position": [
-        4752,
+        4960,
         -240
       ],
       "webhookId": "ea0e343d-7ffa-4dd7-a3aa-0e7e45ad5753",
@@ -580,7 +580,7 @@
       "name": "Create new file",
       "type": "n8n-nodes-base.github",
       "position": [
-        4896,
+        5104,
         2064
       ],
       "webhookId": "66429ae4-4b7d-4fb5-8438-26cdf6c4faa8",
@@ -609,7 +609,7 @@
       "name": "Merge after create",
       "type": "n8n-nodes-base.merge",
       "position": [
-        5184,
+        5392,
         2048
       ],
       "typeVersion": 3.2,
@@ -626,7 +626,7 @@
       "name": "Sticky Note5",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        4928,
+        5136,
         1360
       ],
       "typeVersion": 1
@@ -642,7 +642,7 @@
       "name": "Sticky Note6",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        4640,
+        4848,
         1904
       ],
       "typeVersion": 1
@@ -653,7 +653,7 @@
       "name": "No Operation, do nothing",
       "type": "n8n-nodes-base.noOp",
       "position": [
-        4656,
+        4864,
         2624
       ],
       "typeVersion": 1
@@ -669,7 +669,7 @@
       "name": "Sticky Note7",
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        4240,
+        4448,
         2448
       ],
       "typeVersion": 1
@@ -682,7 +682,7 @@
       "name": "Stop and Error",
       "type": "n8n-nodes-base.stopAndError",
       "position": [
-        3936,
+        4144,
         3024
       ],
       "typeVersion": 1
@@ -691,7 +691,7 @@
       "parameters": {
         "content": "## Controller",
         "height": 448,
-        "width": 1088,
+        "width": 1296,
         "color": 7
       },
       "id": "f7a498d9-900f-41ab-9b5f-8e849b85c38c",
@@ -818,7 +818,7 @@
       "name": "Router",
       "type": "n8n-nodes-base.switch",
       "position": [
-        3728,
+        3936,
         528
       ],
       "typeVersion": 3.2
@@ -840,7 +840,7 @@
       "name": "Merge after delete (rename)",
       "type": "n8n-nodes-base.merge",
       "position": [
-        5568,
+        5776,
         896
       ],
       "typeVersion": 3.2,
@@ -968,6 +968,18 @@
       ],
       "typeVersion": 2.2,
       "notes": "Pre-provisioning safe fuse"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3568,
+        720
+      ],
+      "id": "a62145cf-d98a-44a2-8eff-4c5dcdaf7753",
+      "name": "Wait",
+      "webhookId": "8505aad7-4b2b-4351-9dee-590feec554cc"
     }
   ],
   "connections": {
@@ -1124,7 +1136,7 @@
         ],
         [
           {
-            "node": "Decide changes",
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -1312,6 +1324,17 @@
           }
         ]
       ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Decide changes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1324,7 +1347,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "57fe816f-9725-4381-9a7d-f5edad630b00",
+  "versionId": "c46773f3-98cf-4cb7-8ba1-767f853a7e86",
   "activeVersionId": null,
   "triggerCount": 1,
   "shared": [
