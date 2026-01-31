@@ -1,0 +1,687 @@
+{
+  "updatedAt": "2025-12-24T09:19:08.338Z",
+  "createdAt": "2025-12-10T15:32:37.576Z",
+  "id": "6su0R9zCv0aibVIG",
+  "name": "PunchBot MkII",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "50 8 * * MON-FRI"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 18 * * MON-FRI"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "0 14 * * MON-FRI"
+            },
+            {
+              "field": "cronExpression",
+              "expression": "55 14 * * MON-FRI"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        368
+      ],
+      "id": "ebfcbd94-92c1-4c8c-9043-f36233ec81a8",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "function getRandomInt(min, max) {\n  min = Math.ceil(min); // Ensure min is an integer\n  max = Math.floor(max); // Ensure max is an integer\n  return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Get a random integer between 1 and 10 (inclusive)\nlet randomInteger = getRandomInt(1, 12);\nconsole.log(randomInteger);\nreturn [{\n      \"Delay\": randomInteger\n    }\n  ]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        368
+      ],
+      "id": "168044df-1ae4-4108-a622-5247d9d26fc4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.Delay }}",
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        368
+      ],
+      "id": "18279ce0-46bb-4fb6-907b-dce51f549648",
+      "name": "Wait",
+      "webhookId": "ba825b61-72e3-4569-b720-c90493040081"
+    },
+    {
+      "parameters": {
+        "url": "https://company.gotimecloud.com/api/v1/login",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "company",
+              "value": "cos"
+            },
+            {
+              "name": "username",
+              "value": "50783ea4d01d8303d472f89378cb3e41637e4427a2496406d0a26afd8756edc4"
+            },
+            {
+              "name": "password",
+              "value": "e0b95eca6ba4a20cae14b5de0640ebb82440e5a6a0c10c331dfe598b7d27681a"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Cookie",
+              "value": "PHPSESSID=kn7peku1hn5c3m9nv7kakiqumj"
+            },
+            {
+              "name": "cookie",
+              "value": "PHPSESSID=kn7peku1hn5c3m9nv7kakiqumj;"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1776,
+        464
+      ],
+      "id": "78f703ce-945e-4e56-a6db-6bd6ee44dbf7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        880,
+        -48
+      ],
+      "id": "721fd4eb-0adf-4bfa-8376-e617e95806a5",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.currentDate }}",
+        "format": "custom",
+        "customFormat": "yyyyMMdd",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -400
+      ],
+      "id": "0bcf876e-c322-4b91-b9ca-4318f2abd61e",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $('Date & Time').item.json.currentDate }}",
+        "format": "custom",
+        "customFormat": "HHmmss",
+        "outputFieldName": "formattedTime",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        160
+      ],
+      "id": "4b696d23-f62e-4f7a-b77d-c7341acf42c1",
+      "name": "Date & Time2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "570d1e4b-7bc4-414d-8b78-66d6893554d8",
+              "name": "punchEvent",
+              "value": "0007",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1776,
+        -208
+      ],
+      "id": "35cb374e-97b3-4f1a-9662-4963cc9c8f98",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d027cc7d-27cc-421b-bed0-b91dc9e4d2f3",
+              "name": "punchEvent",
+              "value": "0000",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1776,
+        176
+      ],
+      "id": "1438a372-e95f-4e9a-ac24-a28b583cd14a",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1eaf0e0d-1c37-4eec-953c-f5a1961edcfc",
+              "name": "formattedTime",
+              "value": "={{ $json.formattedTime }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        -16
+      ],
+      "id": "00763e4f-9930-4c83-9c2b-c15ab240a83d",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://company.gotimecloud.com/api/v1/punches",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{ $json.data.token }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "PHPSESSID=kn7peku1hn5c3m9nv7kakiqumj"
+            },
+            {
+              "name": "cookie",
+              "value": "PHPSESSID=kn7peku1hn5c3m9nv7kakiqumj;"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"values\": [\n    {\n      \"employee\": \"000007208\",\n      \"date\": \"{{ $json.formattedDate }}\",\n      \"time\": \"{{ $json.formattedTime }}\",\n      \"event\": \"{{ $json.punchEvent }}\",\n      \"device\": \"MVL\",\n      \"utc\": 1,\n      \"mask\": true,\n      \"temp\": {{ $json.current.temperature_2m }},\n      \"geolocation\": {\n        \"latitude\": 40.61013515861408,\n        \"longitude\": -3.695629043326065\n      }\n    }\n  ]\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2224,
+        160
+      ],
+      "id": "393eb236-7cfc-440c-85a2-ab12deb414c2",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2000,
+        112
+      ],
+      "id": "b35a23fb-e2d1-4631-a4c8-4be47ed8192f",
+      "name": "Merge",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "40.61013515861408"
+            },
+            {
+              "name": "longitude",
+              "value": "-3.695629043326065"
+            },
+            {
+              "name": "current",
+              "value": "temperature_2m"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1776,
+        656
+      ],
+      "id": "2afa00fb-2b8b-42c1-85b4-180c3812b433",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "userKey": "uQGgXpAURK5byAVkkZkNQ1vDjxeTqL",
+        "message": "=Fichaje realizado con éxito el {{ $('Merge').item.json.formattedDate }} a las {{ $('Merge').item.json.formattedTime }}.",
+        "priority": 0,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.pushover",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        160
+      ],
+      "id": "0131dc10-9e16-4b18-9fcd-97508d6120ef",
+      "name": "Push a message",
+      "credentials": {
+        "pushoverApi": {
+          "id": "3KC6ER01C6OxLPFm",
+          "name": "Nick's Pushover account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        656,
+        464
+      ],
+      "id": "3fbacbac-712a-4a85-abca-4e0fac7eb178",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        432,
+        560
+      ],
+      "id": "d5cc7c98-ee1a-4e1c-a0d9-622acad994da",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "570d1e4b-7bc4-414d-8b78-66d6893554d8",
+              "name": "punchEvent",
+              "value": "0005",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1776,
+        -16
+      ],
+      "id": "68ab2b3a-e5cd-40a9-ac7a-9cbc3dd694ac",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "output": "={{ ($json.formattedTime > 080000 && $json.formattedTime < 090000) ? 0 : ($json.formattedTime > 140000 && $json.formattedTime < 150000) ? 1 : ($json.formattedTime > 145400 && $json.formattedTime < 160000) ? 2 : 3}}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        1552,
+        -48
+      ],
+      "id": "c21e3032-caaa-4fc7-8c13-6772614c1461",
+      "name": "Switch"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Date & Time2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Date & Time2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Push a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "898d6799-2cc8-4c15-b830-7d9048d39a54",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-10T15:32:37.614Z",
+      "createdAt": "2025-12-10T15:32:37.614Z",
+      "role": "workflow:owner",
+      "workflowId": "6su0R9zCv0aibVIG",
+      "projectId": "clSSaLQe9S7wj6ik"
+    }
+  ],
+  "activeVersion": null,
+  "tags": [
+    {
+      "updatedAt": "2025-06-01T11:16:21.286Z",
+      "createdAt": "2025-06-01T11:16:21.286Z",
+      "id": "5QPMinZ9SrSvf2Tp",
+      "name": "STABLE"
+    },
+    {
+      "updatedAt": "2025-05-18T16:58:53.843Z",
+      "createdAt": "2025-05-18T16:58:53.843Z",
+      "id": "HnXUnfowm5GUgmjE",
+      "name": "DEPRECATED"
+    },
+    {
+      "updatedAt": "2025-12-11T16:57:50.687Z",
+      "createdAt": "2025-12-11T16:57:50.687Z",
+      "id": "Lq79i8dweIU6nUfE",
+      "name": "PRODUCTION"
+    }
+  ]
+}
